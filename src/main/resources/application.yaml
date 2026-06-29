@@ -3,13 +3,13 @@ spring:
     name: eureka
 
 server:
-  port: 8761
+  port: ${PORT:8761}
 
 eureka:
   client:
-    register-with-eureka: false #No es un cliente eukera
-    fetch-registry: false #No se autoregistra en el servidor eureka
+    register-with-eureka: false
+    fetch-registry: false
   instance:
-    hostname: localhost
+    hostname: ${RENDER_EXTERNAL_HOSTNAME:localhost}
   server:
     enable-self-preservation: false
