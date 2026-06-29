@@ -1,26 +1,15 @@
-# ── Etapa 1: compilar ──────────────────────────────────────────
+# Etapa 1: Construcción
 FROM eclipse-temurin:21-jdk-alpine AS builder
 WORKDIR /app
+# Copia absolutamente todo lo que esté en la raíz de tu GitHub al contenedor
+COPY . .
+# Da permisos de ejecución al wrapper de Maven y compila
+RUN chmod +x mvnw && ./mvnw clean package -DskipTests -q
 
-# Copiar archivos de Maven
-COPY .mvn/ .mvn/
-COPY mvnw pom.xml ./
-
-# Descargar dependencias primero (capa cacheada)
-RUN ./mvnw dependency:go-offline -q
-
-# Copiar código fuente y compilar sin ejecutar tests
-COPY src ./src
-RUN ./mvnw package -DskipTests -q
-
-# ── Etapa 2: imagen final ligera ───────────────────────────────
+# Etapa 2: Ejecución (Imagen ligera)
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
-
-# Copiar solo el JAR generado
+# Copia el archivo JAR generado en la etapa anterior
 COPY --from=builder /app/target/*.jar app.jar
-
-# Render asigna el puerto dinámicamente vía variable PORT
-EXPOSE 8080
-
+EXPOSE 8761
 ENTRYPOINT ["java", "-jar", "app.jar"]
